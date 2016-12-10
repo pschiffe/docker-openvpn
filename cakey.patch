@@ -1,0 +1,12 @@
+--- /usr/local/bin/easyrsa.orig
++++ /usr/local/bin/easyrsa
+@@ -458,7 +458,7 @@
+ 	out_file_tmp="$(mktemp -u "$out_file.XXXXXXXXXX")"; EASYRSA_TEMP_FILE_3="$out_file_tmp"
+ 	# create the CA keypair:
+ 	"$EASYRSA_OPENSSL" req -utf8 -new -newkey $EASYRSA_ALGO:"$EASYRSA_ALGO_PARAMS" \
+-		-config "$EASYRSA_SSL_CONF" -keyout "$out_key_tmp" -out "$out_file_tmp" $opts || \
++		-config "$EASYRSA_SSL_CONF" -keyout "$out_key_tmp" -out "$out_file_tmp" $opts -passout env:CA_KEY || \
+ 		die "Failed to build the CA"
+ 	mv "$out_key_tmp" "$out_key"; EASYRSA_TEMP_FILE_2=
+ 	mv "$out_file_tmp" "$out_file"; EASYRSA_TEMP_FILE_3=
+
