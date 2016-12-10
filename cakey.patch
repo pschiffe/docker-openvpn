@@ -18,12 +18,3 @@
  		|| die "signing failed (openssl output above may have more detail)"
  	mv "$crt_out_tmp" "$crt_out"; EASYRSA_TEMP_FILE_2=
  	notice "\
-@@ -681,6 +681,7 @@
- 	[ -f "$key_out" ] && die "Key $err_exists $key_out"
- 	[ -f "$crt_out" ] && die "Certificate $err_exists $crt_out"
- 
-+        set -x
- 	# create request
- 	EASYRSA_REQ_CN="$name"
- 	gen_req "$name" batch $req_opts
-
