@@ -9,4 +9,13 @@
  		die "Failed to build the CA"
  	mv "$out_key_tmp" "$out_key"; EASYRSA_TEMP_FILE_2=
  	mv "$out_file_tmp" "$out_file"; EASYRSA_TEMP_FILE_3=
+@@ -551,7 +551,7 @@
+ 	# generate request
+ 	[ $EASYRSA_BATCH ] && opts="$opts -batch"
+ 	"$EASYRSA_OPENSSL" req -utf8 -new -newkey $EASYRSA_ALGO:"$EASYRSA_ALGO_PARAMS" \
+-		-config "$EASYRSA_SSL_CONF" -keyout "$key_out_tmp" -out "$req_out_tmp" $opts \
++		-config "$EASYRSA_SSL_CONF" -keyout "$key_out_tmp" -out "$req_out_tmp" $opts -passin env:CA_KEY  \
+ 		|| die "Failed to generate request"
+ 	mv "$key_out_tmp" "$key_out"; EASYRSA_TEMP_FILE_2=
+ 	mv "$req_out_tmp" "$req_out"; EASYRSA_TEMP_FILE_3=
 
