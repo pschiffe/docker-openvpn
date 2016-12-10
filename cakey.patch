@@ -9,6 +9,15 @@
  		die "Failed to build the CA"
  	mv "$out_key_tmp" "$out_key"; EASYRSA_TEMP_FILE_2=
  	mv "$out_file_tmp" "$out_file"; EASYRSA_TEMP_FILE_3=
+@@ -638,7 +638,7 @@
+ 	# sign request
+ 	crt_out_tmp="$(mktemp -u "$crt_out.XXXXXXXXXX")"; EASYRSA_TEMP_FILE_2="$crt_out_tmp"
+ 	"$EASYRSA_OPENSSL" ca -utf8 -in "$req_in" -out "$crt_out_tmp" -config "$EASYRSA_SSL_CONF" \
+-		-extfile "$EASYRSA_TEMP_FILE" -days $EASYRSA_CERT_EXPIRE -batch $opts \
++		-extfile "$EASYRSA_TEMP_FILE" -days $EASYRSA_CERT_EXPIRE -batch $opts -passin env:CA_KEY  \
+ 		|| die "signing failed (openssl output above may have more detail)"
+ 	mv "$crt_out_tmp" "$crt_out"; EASYRSA_TEMP_FILE_2=
+ 	notice "\
 @@ -681,6 +681,7 @@
  	[ -f "$key_out" ] && die "Key $err_exists $key_out"
  	[ -f "$crt_out" ] && die "Certificate $err_exists $crt_out"
