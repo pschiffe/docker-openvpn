@@ -1,0 +1,3 @@
+---
+dns_name: '{{ dnsmasq_container_name | default("dnsmasq") }}'
+dns_net_name: '{{ dnsmasq_network_name | default(dns_name) }}'

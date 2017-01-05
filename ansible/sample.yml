@@ -1,0 +1,24 @@
+---
+- name: deploy openvpn
+  hosts: sample-host
+  roles:
+  - role: openvpn
+    openvpn_container_name: system-vpn-with-dns
+    system_vpn: true
+    split_tunnel: true
+    custom_dns: true
+    openvpn_container_url: system-vpn.sample-host
+    openvpn_container_network_subnet: '172.100.1.0/24'
+    openvpn_container_network_gateway: '172.100.1.1'
+    vpn_subnet: '192.168.100.0/24'
+    custom_vpn_options: -p 'route 172.100.1.0 255.255.255.0'
+    openvpn_container_ca_key: 'my-super-secret'
+
+  - role: openvpn
+    openvpn_container_name: normal-vpn
+    openvpn_container_url: normal-vpn.sample-host
+    openvpn_container_network_subnet: '172.100.2.0/24'
+    openvpn_container_network_gateway: '172.100.2.1'
+    vpn_subnet: '192.168.101.0/24'
+    openvpn_container_ca_key: 'another-super-secret'
+    openvpn_container_port: 25555

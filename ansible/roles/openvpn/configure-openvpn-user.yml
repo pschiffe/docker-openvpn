@@ -1,0 +1,5 @@
+---
+- name: configure openvpn user
+  hosts: sample-host
+  tasks:
+    - include: ./tasks/config-user.yml

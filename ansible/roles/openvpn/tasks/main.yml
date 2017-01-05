@@ -1,0 +1,99 @@
+---
+- name: folder for selinux policy
+  file: path="{{ ansible_env.HOME }}/openvpn-selinux" state=directory
+
+- name: distribute selinux policy
+  copy: src=docker-openvpn.pp dest="{{ ansible_env.HOME }}/openvpn-selinux"
+  register: selinux_policy
+
+- name: reload selinux policy
+  command: semodule -i {{ ansible_env.HOME }}/openvpn-selinux/docker-openvpn.pp
+  when: selinux_policy.changed
+
+- name: create a network for openvpn container
+  docker_network:
+    name: '{{ nname }}'
+    ipam_options:
+      subnet: '{{ nsubnet }}'
+      gateway: '{{ ngateway }}'
+
+- name: check if openvpn container config exists
+  command: docker volume inspect '{{ cname }}-config'
+  ignore_errors: true
+  register: openvpn_container
+
+- name: deploy custom dns
+  include: ../../docker-dnsmasq/tasks/main.yml
+  vars:
+    dns_name: '{{ cname + "-dns" }}'
+    dns_net_name: '{{ nname }}'
+    dnsmasq_options: '{{ cust_dns_options }}'
+  when: cust_dns
+
+- name: get custom dns ip address
+  command: docker inspect -f '{{ "{{" }}range .NetworkSettings.Networks{{ "}}" }}{{ "{{" }}.IPAddress{{ "}}" }}{{ "{{" }}end{{ "}}" }}' '{{ cname + "-dns" }}'
+  register: cust_dns_ip
+  when: cust_dns
+
+- name: configure openvpn container
+  docker_container:
+    name: '{{ cname }}-conf'
+    image: pschiffe/openvpn
+    pull: true
+    state: started
+    network_mode: '{{ net_mode }}'
+    purge_networks: '{{ purge_nets }}'
+    networks: '{{ nets }}'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - '{{ cname }}-config:/etc/openvpn:z'
+    detach: false
+    command: ovpn_genconfig -C 'AES-256-CBC' -a 'SHA384' {{ genconfig_options }} -u udp://{{ openvpn_container_url | default(ansible_fqdn) }}:{{ ovpn_port }} -s {{ vsubnet }} -n {{ cust_dns_ip.stdout if cust_dns else openvpn_container_dns | default('8.8.8.8 8.8.4.4') }} {{ cust_vpn_options }}
+  when:
+    - openvpn_container|failed
+
+- name: configure keys for openvpn container
+  docker_container:
+    name: '{{ cname }}-conf'
+    image: pschiffe/openvpn
+    pull: true
+    state: started
+    network_mode: '{{ net_mode }}'
+    purge_networks: '{{ purge_nets }}'
+    networks: '{{ nets }}'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - '{{ cname }}-config:/etc/openvpn:z'
+    detach: false
+    env:
+      CA_KEY: '{{ openvpn_container_ca_key }}'
+      CA_CN: '{{ openvpn_container_url | default(ansible_fqdn) }}'
+    command: ovpn_initpki
+  when:
+    - openvpn_container|failed
+
+- name: remove configuration openvpn container
+  docker_container:
+    name: '{{ cname }}-conf'
+    state: absent
+
+- name: create main openvpn container
+  docker_container:
+    name: '{{ cname }}'
+    image: pschiffe/openvpn
+    pull: true
+    state: started
+    restart_policy: always
+    capabilities:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    security_opts:
+      - 'label:disable'
+    network_mode: '{{ net_mode }}'
+    purge_networks: '{{ purge_nets }}'
+    networks: '{{ nets }}'
+    published_ports: '{{ [] if sys_vpn else ovpn_port + ":1194/udp" }}'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - '{{ cname }}-config:/etc/openvpn:z'
