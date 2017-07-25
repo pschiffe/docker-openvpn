@@ -1,0 +1,4 @@
+---
+dnsmasq_container_name: dnsmasq
+dnsmasq_network_name: '{{ dnsmasq_container_name }}'
+dnsmasq_options: ''

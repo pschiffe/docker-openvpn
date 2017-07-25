@@ -1,0 +1,18 @@
+---
+openvpn_container_name: openvpn
+openvpn_network_name: '{{ openvpn_container_name }}'
+system_vpn: false
+split_tunnel: false
+net_mode: '{{ "host" if system_vpn else "bridge" }}'
+purge_nets: '{{ false if system_vpn else true }}'
+nets: '{{ [] if system_vpn else [ { "name": openvpn_network_name } ] }}'
+genconfig_options: '{{ "-Nd" if split_tunnel else "" }}'
+custom_dns: false
+custom_dns_options: ''
+openvpn_container_url: '{{ ansible_fqdn }}'
+openvpn_container_dns: 8.8.8.8 8.8.4.4
+openvpn_container_network_subnet: ''
+openvpn_container_network_gateway: ''
+vpn_subnet: '192.168.255.0/24'
+openvpn_container_port: '1194'
+custom_vpn_options: ''

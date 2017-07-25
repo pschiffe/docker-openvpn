@@ -7,7 +7,7 @@
     state: started
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - '{{ openvpn_container }}-config:/etc/openvpn:z'
+      - '{{ openvpn_container_name }}-config:/etc/openvpn:z'
     detach: false
     env:
       CA_KEY: '{{ openvpn_container_ca_key }}'
@@ -15,11 +15,12 @@
   ignore_errors: true
 
 - name: get user's config
-  command: docker exec {{ openvpn_container }} ovpn_getclient {{ openvpn_client_name }}
+  command: docker exec {{ openvpn_container_name }} ovpn_getclient {{ openvpn_client_name }}
   register: user_conf
 
 - name: print user config
-  debug: var=user_conf
+  debug:
+    var: user_conf
 
 - name: remove configuration openvpn container
   docker_container:

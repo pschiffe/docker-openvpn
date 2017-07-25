@@ -1,19 +1,21 @@
 ---
 - name: create a network for dnsmasq container
-  docker_network: name='{{ dns_net_name }}'
+  docker_network:
+    name: '{{ dnsmasq_network_name }}'
+    state: present
 
 - name: create a dnsmasq container
   docker_container:
-    name: '{{ dns_name }}'
+    name: '{{ dnsmasq_container_name }}'
     image: andyshinn/dnsmasq:2.76
     pull: true
     state: started
     restart_policy: always
     purge_networks: true
     networks:
-      - name: '{{ dns_net_name }}'
+      - name: '{{ dnsmasq_network_name }}'
     capabilities:
       - NET_ADMIN
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    command: --log-facility=- {{ dnsmasq_options | default('') }}
+    command: --log-facility=- {{ dnsmasq_options }}
