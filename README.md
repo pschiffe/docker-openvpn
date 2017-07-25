@@ -11,9 +11,3 @@ In ansible folder of this repo you can find example ansible roles for this image
 cd ansible
 ansible-playbook sample.yml
 ```
-
-There is one more playbook for creating users, which can be used like this:
-```
-cd ansible
-ansible-playbook -e openvpn_client_name=john -e openvpn_container=normal-vpn -e openvpn_container_ca_key=another-super-secret roles/openvpn/configure-openvpn-user.yml
-```
