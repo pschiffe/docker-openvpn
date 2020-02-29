@@ -1,5 +1,4 @@
 FROM kylemanna/openvpn:2.4
-MAINTAINER "Peter Schiffer" <pschiffe@redhat.com>
 
 COPY cakey.patch /cakey.patch
 RUN cd / \
