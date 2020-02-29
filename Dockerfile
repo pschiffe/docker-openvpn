@@ -1,4 +1,4 @@
-FROM kylemanna/openvpn:2.4
+FROM kylemanna/openvpn
 
 RUN apk --no-cache upgrade
 
