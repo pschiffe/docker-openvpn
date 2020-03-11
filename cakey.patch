@@ -1,5 +1,5 @@
---- /usr/local/bin/easyrsa.orig
-+++ /usr/local/bin/easyrsa
+--- /usr/share/easy-rsa/easyrsa.orig
++++ /usr/share/easy-rsa/easyrsa
 @@ -590,7 +590,7 @@
  	[ ! $nopass ] && crypto_opts="-passin file:$out_key_pass_tmp"
  	#shellcheck disable=SC2086
