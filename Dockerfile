@@ -2,13 +2,8 @@ FROM kylemanna/openvpn
 
 RUN apk --no-cache upgrade
 
-COPY cakey.patch /
-RUN cd / \
-  && cp /usr/share/easy-rsa/easyrsa /usr/share/easy-rsa/easyrsa.orig \
-  && patch /usr/share/easy-rsa/easyrsa /cakey.patch
+# until https://github.com/OpenVPN/easy-rsa/pull/368 is merged
+RUN wget -O /usr/share/easy-rsa/easyrsa https://github.com/pschiffe/easy-rsa/raw/master/easyrsa3/easyrsa \
+  && chmod 0775 /usr/share/easy-rsa/easyrsa
 
-# backport https://github.com/OpenVPN/easy-rsa/pull/315
-# until 3.0.7 is released
-COPY easyrsa.patch /
-RUN cd / \
-  && patch /usr/share/easy-rsa/easyrsa /easyrsa.patch
+ENV EASYRSA_VARS_FILE=''
