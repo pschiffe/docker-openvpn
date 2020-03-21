@@ -12,15 +12,24 @@
 
 - name: reload selinux policy
   command: semodule -i ~/openvpn-selinux/docker-openvpn.pp
-  when: selinux_policy | changed
+  when: selinux_policy is changed
+
+- name: create a network for openvpn container with custom subnet
+  docker_network:
+    name: '{{ openvpn_network_name }}'
+    ipam_config:
+      - subnet: '{{ openvpn_container_network_subnet }}'
+        gateway: '{{ openvpn_container_network_gateway }}'
+    state: present
+  when:
+    - openvpn_container_network_subnet != ''
+    - openvpn_container_network_gateway != ''
 
 - name: create a network for openvpn container
   docker_network:
     name: '{{ openvpn_network_name }}'
-    ipam_options:
-      subnet: '{{ openvpn_container_network_subnet }}'
-      gateway: '{{ openvpn_container_network_gateway }}'
     state: present
+  when: openvpn_container_network_subnet == '' or openvpn_container_network_gateway == ''
 
 - name: check if openvpn container config exists
   command: docker volume inspect {{ openvpn_container_name }}-config
@@ -46,10 +55,10 @@
     docker_container:
       name: '{{ openvpn_container_name }}-conf'
       image: pschiffe/openvpn
-      pull: true
+      pull: '{{ container_pull }}'
       state: started
       network_mode: '{{ net_mode }}'
-      purge_networks: '{{ purge_nets }}'
+      networks_cli_compatible: true
       networks: '{{ nets }}'
       volumes:
         - /etc/localtime:/etc/localtime:ro
@@ -61,20 +70,22 @@
     docker_container:
       name: '{{ openvpn_container_name }}-conf'
       image: pschiffe/openvpn
-      pull: true
+      pull: '{{ container_pull }}'
       state: started
       network_mode: '{{ net_mode }}'
-      purge_networks: '{{ purge_nets }}'
+      networks_cli_compatible: true
       networks: '{{ nets }}'
       volumes:
         - /etc/localtime:/etc/localtime:ro
         - '{{ openvpn_container_name }}-config:/etc/openvpn:z'
       detach: false
       env:
-        CA_KEY: '{{ openvpn_container_ca_key }}'
-        CA_CN: '{{ openvpn_container_url }}'
+        EASYRSA_BATCH: '1'
+        EASYRSA_PASSIN: 'pass:{{ openvpn_container_ca_key }}'
+        EASYRSA_PASSOUT: 'pass:{{ openvpn_container_ca_key }}'
+        EASYRSA_REQ_CN: '{{ openvpn_container_url }}'
       command: ovpn_initpki
-  when: openvpn_container_config_state | failed
+  when: openvpn_container_config_state is failed
 
 - name: remove openvpn configuration container
   docker_container:
@@ -85,7 +96,7 @@
   docker_container:
     name: '{{ openvpn_container_name }}'
     image: pschiffe/openvpn
-    pull: true
+    pull: '{{ container_pull }}'
     state: started
     restart_policy: always
     capabilities:
@@ -95,7 +106,7 @@
     security_opts:
       - 'label:disable'
     network_mode: '{{ net_mode }}'
-    purge_networks: '{{ purge_nets }}'
+    networks_cli_compatible: true
     networks: '{{ nets }}'
     published_ports: '{{ [] if system_vpn else openvpn_container_port + ":1194/udp" }}'
     volumes:

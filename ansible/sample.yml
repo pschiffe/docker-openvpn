@@ -1,34 +1,36 @@
 ---
 - name: deploy openvpn
   hosts: localhost
+  vars:
+    container_pull: true
   roles:
-   - role: openvpn
-     openvpn_container_name: system-vpn-with-dns
-     system_vpn: true
-     split_tunnel: true
-     custom_dns: true
-     openvpn_container_url: system-vpn.sample-host.url
-     openvpn_container_network_subnet: '172.100.1.0/24'
-     openvpn_container_network_gateway: '172.100.1.1'
-     vpn_subnet: '192.168.100.0/24'
-     custom_vpn_options: -p 'route 172.100.1.0 255.255.255.0'
-     openvpn_container_ca_key: my-super-secret
+    - role: openvpn
+      custom_dns: true
+      custom_vpn_options: -p 'route 172.100.1.0 255.255.255.0'
+      openvpn_container_ca_key: my-super-secret
+      openvpn_container_name: system-vpn-with-dns
+      openvpn_container_network_gateway: '172.100.1.1'
+      openvpn_container_network_subnet: '172.100.1.0/24'
+      openvpn_container_url: system-vpn.sample-host.url
+      split_tunnel: true
+      system_vpn: true
+      vpn_subnet: '192.168.100.0/24'
 
     - role: openvpn
-      openvpn_container_name: normal-vpn
-      openvpn_container_url: normal-vpn.sample-host.url
-      openvpn_container_network_subnet: '172.100.2.0/24'
-      openvpn_container_network_gateway: '172.100.2.1'
-      vpn_subnet: '192.168.101.0/24'
       openvpn_container_ca_key: another-super-secret
+      openvpn_container_name: normal-vpn
+      openvpn_container_network_gateway: '172.100.2.1'
+      openvpn_container_network_subnet: '172.100.2.0/24'
       openvpn_container_port: '25555'
+      openvpn_container_url: normal-vpn.sample-host.url
+      vpn_subnet: '192.168.101.0/24'
 
- tasks:
-   - name: create vpn config for user john
-     include_role:
-       name: openvpn
-       tasks_from: config-user
-     vars:
-       openvpn_client_name: john
-       openvpn_container_name: normal-vpn
-       openvpn_container_ca_key: another-super-secret
+  tasks:
+    - name: create vpn config for user john
+      include_role:
+        name: openvpn
+        tasks_from: config-user
+      vars:
+        openvpn_client_name: john
+        openvpn_container_ca_key: another-super-secret
+        openvpn_container_name: normal-vpn

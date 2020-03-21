@@ -7,11 +7,11 @@
 - name: create a dnsmasq container
   docker_container:
     name: '{{ dnsmasq_container_name }}'
-    image: andyshinn/dnsmasq:2.76
+    image: andyshinn/dnsmasq:2.78
     pull: true
     state: started
     restart_policy: always
-    purge_networks: true
+    networks_cli_compatible: true
     networks:
       - name: '{{ dnsmasq_network_name }}'
     capabilities:

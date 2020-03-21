@@ -3,14 +3,14 @@
   docker_container:
     name: openvpn-user-conf
     image: pschiffe/openvpn
-    pull: true
+    pull: '{{ container_pull }}'
     state: started
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - '{{ openvpn_container_name }}-config:/etc/openvpn:z'
     detach: false
     env:
-      CA_KEY: '{{ openvpn_container_ca_key }}'
+      EASYRSA_PASSIN: 'pass:{{ openvpn_container_ca_key }}'
     command: easyrsa build-client-full {{ openvpn_client_name }} nopass
   ignore_errors: true
 
