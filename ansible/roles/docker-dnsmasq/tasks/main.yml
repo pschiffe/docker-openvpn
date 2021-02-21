@@ -7,7 +7,7 @@
 - name: create a dnsmasq container
   docker_container:
     name: '{{ dnsmasq_container_name }}'
-    image: andyshinn/dnsmasq:2.78
+    image: andyshinn/dnsmasq:2.83
     pull: true
     state: started
     restart_policy: always
